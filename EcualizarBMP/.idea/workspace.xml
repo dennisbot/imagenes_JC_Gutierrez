@@ -11,16 +11,7 @@
     </ADDITIONAL_GENERATION_ENVIRONMENT>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bfe55b3e-eb67-438c-a7e7-c2ca9f4f2dc1" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/another.cpp" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/do.cpp" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/reading_writing_struct.cpp" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out_ecualizado/lena_8bits_output.bmp" afterPath="$PROJECT_DIR$/out_ecualizado/lena_8bits_output.bmp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/EcualizarBMP.iml" afterPath="$PROJECT_DIR$/.idea/EcualizarBMP.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CMakeLists.txt" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.cpp" afterPath="$PROJECT_DIR$/main.cpp" />
-    </list>
+    <list default="true" id="bfe55b3e-eb67-438c-a7e7-c2ca9f4f2dc1" name="Default" comment="" />
     <ignored path="EcualizarBMP.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -379,12 +370,12 @@
       <workItem from="1479595429931" duration="4410000" />
       <workItem from="1479601372720" duration="5274000" />
       <workItem from="1479613568815" duration="19000" />
-      <workItem from="1479613684869" duration="10132000" />
+      <workItem from="1479613684869" duration="10455000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21935000" />
+    <option name="totallyTimeSpent" value="22258000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1280" height="773" extended-state="6" />
