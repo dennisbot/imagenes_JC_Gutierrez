@@ -1,9 +1,27 @@
 #include "functions.h"
 using namespace std;
 
+string getWithPath(string filename) {
+    string s(PATH_PROJECT, strlen(PATH_PROJECT));
+    #ifndef __APPLE__
+        s = filename;
+    #else
+        int pos = filename.find("\\");
+        if (pos != -1) filename.replace(pos, 1, "/");
+        s += filename;
+    #endif
+    return s;
+}
+
 void test() {
+
+	string filename = "input\\test.out";
+
+    filename = getWithPath(filename);
+    db(filename);
+
 	char * row = new char[16];
-	ifstream in("input\\test.out", ios::in | ios::binary);
+	ifstream in(filename, ios::in | ios::binary);
 	printf("sizeof row %d\n", sizeof(row));
 	in.read(row, sizeof(row) * 4);
 	in.close();
@@ -11,7 +29,7 @@ void test() {
 	for (size_t i = 0; i < 6; i++) {
 		printf("Group %d\n", i);
 		puts("==============================");
-		printf("sizeof pixel %d\n", sizeof(pixel));
+		printf("sizeof pixel %lu\n", sizeof(pixel));
 		printf("G = %d hex = %x\n", pixel->Comp.Green, pixel->Comp.Green);
 		printf("R = %d hex = %x\n", pixel->Comp.Red, pixel->Comp.Red);
 		printf("B = %d hex = %x\n", pixel->Comp.Blue, pixel->Comp.Blue);
@@ -19,12 +37,12 @@ void test() {
 	}
 }
 
-void Ecualizar8bits(string in_filename, string out_filename) {
+void Ecualizar1bit(string in_filename, string out_filename) {
 	//Setup buffers to read in file
 	bmp_header_info input_file_header;
 	long length;
 	char* header;
-	char* buffer;
+	unsigned char* buffer;
 	int header_size = 54;
 	ifstream infile;
 	ofstream outfile;
@@ -32,7 +50,7 @@ void Ecualizar8bits(string in_filename, string out_filename) {
 	// Cambiar esta cadena para que quepe con la imagen
 	infile.open(in_filename, ios::binary | ios::in);
 
-	// obtener el tamaÒo del archivo:
+	// obtener el tama√±o del archivo:
 	infile.seekg(0, ios::end);
 	length = infile.tellg();
 	infile.seekg(0, ios::beg);
@@ -43,45 +61,157 @@ void Ecualizar8bits(string in_filename, string out_filename) {
 	// reservar memoria:
 	header = new char[header_size];
 
-	buffer = new char[length - header_size];
+	buffer = new unsigned char[length - header_size - 2 * sizeof(palette_t)];
 
 	// leer los datos como si fueran muchos bloques
 	infile.read(header, 2);
 	infile.read((char*)(&input_file_header), sizeof(input_file_header));
-	dennisbot paleta;
-	infile.read((char*)&paleta, sizeof(dennisbot));
-	puts("PALETA");
-	puts("======================================");
-	printf("%d - %x\n", paleta.rgbBlue);
-	printf("%d - %x\n", paleta.rgbGreen);
-	printf("%d - %x\n", paleta.rgbRed);
-	printf("%d - %x\n", paleta.rgbReserved);
-	puts("======================================");
+	
+	char *info_paleta = new char[4 * 2];
+	
+	printf("sizeof paleta 1 bit = %d\n", sizeof(palette_t));
+	infile.read(info_paleta, 2 * sizeof(palette_t));
+	
+	palette_t *paleta = (palette_t*)info_paleta;	
+	palette_t *cur_paleta = paleta;
 
-	infile.read(buffer, length - header_size);
+	puts("________________________________________________");
+	printf("n√∫mero de bits por pixel = %d\n", input_file_header.num_of_bit_per_pix);
+	printf("offset of pixel data = %d\n", input_file_header.offset_of_pixel_data);
+	puts("PALETA DE 1 BIT DE PROFUNDIDAD");
+	puts("======================================");
+	printf("%d - %x\n", paleta->rgbBlue, paleta->rgbBlue);
+	printf("%d - %x\n", paleta->rgbGreen, paleta->rgbGreen);
+	printf("%d - %x\n", paleta->rgbRed, paleta->rgbRed);
+	printf("%d - %x\n", paleta->rgbReserved, paleta->rgbReserved);
+	puts("======================================");
+	puts("para el sgte color:"); paleta++;
+	puts("======================================");
+	printf("%d - %x\n", paleta->rgbBlue, paleta->rgbBlue);
+	printf("%d - %x\n", paleta->rgbGreen, paleta->rgbGreen);
+	printf("%d - %x\n", paleta->rgbRed, paleta->rgbRed);
+	printf("%d - %x\n", paleta->rgbReserved, paleta->rgbReserved);
+	puts("======================================");
+	printf("offset :) = %d\n", header_size + 2 * sizeof(palette_t));
+	printf("width = %d\n", input_file_header.width);
+	puts("________________________________________________");
+
+	infile.read((char*)buffer, length - header_size - 2 * sizeof(palette_t));
 	infile.close();
-	puts("se deitene aca");
-	int a;
-	cin >> a;
-	return;
+	
 	// hacemos algunas copias del buffer
-	char *buffer_copy = new char[length - header_size];
-	char *image_ptr_copy = buffer_copy;
-	char *image_ptr = buffer;
-	char *header_ptr = header;
+	unsigned char *buffer_copy = new unsigned char[length - header_size - 2 * sizeof(palette_t)];
+	unsigned char *image_ptr_copy = buffer_copy;
+	unsigned char *image_ptr = buffer;
 
-	// EcualizaciÛn del histograma
-	EcualizacionHistograma8bits((RGB_Pixel_t*)image_ptr, input_file_header.width, input_file_header.height, (RGB_Pixel_t*)(image_ptr_copy));
+	// Ecualizaci√≥n del histograma
+	EcualizacionHistograma1bit(image_ptr, input_file_header.width, input_file_header.height, image_ptr_copy);
 
 
 	// Guardar imagen en escala de grises
 	outfile.open(out_filename, ios::out | ios::trunc | ios::binary);
 
 	outfile.write(header, 2);
+	printf("size of info_paleta debe ser 8 bytes = %d\n", sizeof(info_paleta));
 	outfile.write((char*)(&input_file_header), sizeof(input_file_header));
-	outfile.write(buffer_copy, length - header_size);
+	
+	outfile.write((char*)cur_paleta, sizeof(cur_paleta));
+	cur_paleta++;
+	outfile.write((char*)cur_paleta, sizeof(cur_paleta));
+
+	outfile.write((char*)buffer_copy, length - sizeof(input_file_header) - sizeof(info_paleta));
 	outfile.close();
-	// Clean up
+	// Limpiamos
+	delete header;
+	delete buffer;
+	delete buffer_copy;
+}
+
+void Ecualizar8bits(string in_filename, string out_filename) {
+	//Setup buffers to read in file
+	bmp_header_info input_file_header;
+	long length;
+	char* header;
+	unsigned char* buffer;
+	int header_size = 54;
+	ifstream infile;
+	ofstream outfile;
+
+	// Cambiar esta cadena para que quepe con la imagen
+	infile.open(in_filename, ios::binary | ios::in);
+
+	// obtener el tama√±o del archivo:
+	infile.seekg(0, ios::end);
+	length = infile.tellg();
+	infile.seekg(0, ios::beg);
+	cout << in_filename << endl;
+	cout << length << "\n";
+	cout << length - header_size << "\n";
+
+	// reservar memoria:
+	header = new char[header_size];
+
+	buffer = new unsigned char[length - header_size - 2 * sizeof(palette_t)];
+
+	// leer los datos como si fueran muchos bloques
+	infile.read(header, 2);
+	infile.read((char*)(&input_file_header), sizeof(input_file_header));
+	
+	char *info_paleta = new char[4 * 2];
+	
+	printf("sizeof paleta 1 bit = %d\n", sizeof(palette_t));
+	infile.read(info_paleta, 2 * sizeof(palette_t));
+	
+	palette_t *paleta = (palette_t*)info_paleta;	
+	palette_t *cur_paleta = paleta;
+
+	puts("________________________________________________");
+	printf("n√∫mero de bits por pixel = %d\n", input_file_header.num_of_bit_per_pix);
+	printf("offset of pixel data = %d\n", input_file_header.offset_of_pixel_data);
+	puts("PALETA DE 1 BIT DE PROFUNDIDAD");
+	puts("======================================");
+	printf("%d - %x\n", paleta->rgbBlue, paleta->rgbBlue);
+	printf("%d - %x\n", paleta->rgbGreen, paleta->rgbGreen);
+	printf("%d - %x\n", paleta->rgbRed, paleta->rgbRed);
+	printf("%d - %x\n", paleta->rgbReserved, paleta->rgbReserved);
+	puts("======================================");
+	puts("para el sgte color:"); paleta++;
+	puts("======================================");
+	printf("%d - %x\n", paleta->rgbBlue, paleta->rgbBlue);
+	printf("%d - %x\n", paleta->rgbGreen, paleta->rgbGreen);
+	printf("%d - %x\n", paleta->rgbRed, paleta->rgbRed);
+	printf("%d - %x\n", paleta->rgbReserved, paleta->rgbReserved);
+	puts("======================================");
+	printf("offset :) = %d\n", header_size + 2 * sizeof(palette_t));
+	printf("width = %d\n", input_file_header.width);
+	puts("________________________________________________");
+
+	infile.read((char*)buffer, length - header_size - 2 * sizeof(palette_t));
+	infile.close();
+	
+	// hacemos algunas copias del buffer
+	unsigned char *buffer_copy = new unsigned char[length - header_size - 2 * sizeof(palette_t)];
+	unsigned char *image_ptr_copy = buffer_copy;
+	unsigned char *image_ptr = buffer;
+
+	// Ecualizaci√≥n del histograma
+	EcualizacionHistograma8bits(image_ptr, input_file_header.width, input_file_header.height, image_ptr_copy);
+
+
+	// Guardar imagen en escala de grises
+	outfile.open(out_filename, ios::out | ios::trunc | ios::binary);
+
+	outfile.write(header, 2);
+	printf("size of info_paleta debe ser 8 bytes = %d\n", sizeof(info_paleta));
+	outfile.write((char*)(&input_file_header), sizeof(input_file_header));
+	
+	outfile.write((char*)cur_paleta, sizeof(cur_paleta));
+	cur_paleta++;
+	outfile.write((char*)cur_paleta, sizeof(cur_paleta));
+
+	outfile.write((char*)buffer_copy, length - sizeof(input_file_header) - sizeof(info_paleta));
+	outfile.close();
+	// Limpiamos
 	delete header;
 	delete buffer;
 	delete buffer_copy;
@@ -101,7 +231,7 @@ void Ecualizar(string in_filename, string out_filename, bool is_gray_scale)
 	// Cambiar esta cadena para que quepe con la imagen
 	infile.open(in_filename, ios::binary | ios::in);
 
-	// obtener el tamaÒo del archivo:
+	// obtener el tama√±o del archivo:
 	infile.seekg(0, ios::end);
 	length = infile.tellg();
 	infile.seekg(0, ios::beg);
@@ -165,9 +295,8 @@ void Ecualizar(string in_filename, string out_filename, bool is_gray_scale)
 	char *buffer_copy = new char[length - header_size];
 	char *image_ptr_copy = buffer_copy;
 	char *image_ptr = buffer;
-	char *header_ptr = header;
 	
-	// EcualizaciÛn del histograma
+	// Ecualizaci√≥n del histograma
 	EcualizacionHistograma((RGB_Pixel_t*)image_ptr, input_file_header.width, input_file_header.height, (RGB_Pixel_t*)(image_ptr_copy), is_gray_scale);
 
 
@@ -178,13 +307,13 @@ void Ecualizar(string in_filename, string out_filename, bool is_gray_scale)
 	outfile.write((char*)(&input_file_header), sizeof(input_file_header));
 	outfile.write(buffer_copy, length - header_size);
 	outfile.close();
-	// Clean up
+	// Limpiamos
 	delete header;
 	delete buffer;
 	delete buffer_copy;
 }
 
-//Realizar la ecualizaciÛn del Histograma en la imagen
+//Realizar la ecualizaci√≥n del Histograma en la imagen
 void EcualizacionHistograma(RGB_Pixel_t * InImg, unsigned int Image_Width, unsigned int Image_Height, RGB_Pixel_t * OutImg, bool is_gray_scale)
 {
 	// Declare variables
@@ -210,9 +339,9 @@ void EcualizacionHistograma(RGB_Pixel_t * InImg, unsigned int Image_Width, unsig
 	memset(a_HistogramB, 0, sizeof(int) * 256);
 
 	//------------------------------------------------------------------------------//
-	//Histograma de ecualizacion
+	// Histograma de ecualizacion
 	//------------------------------------------------------------------------------//
-	// Build Histogram of image
+	// Construir el histograma de la imagen
 	for (int i = 0; i < Image_Size; i++)
 	{
 		a_HistogramR[pImageBuff->Comp.Red]++;
@@ -221,7 +350,7 @@ void EcualizacionHistograma(RGB_Pixel_t * InImg, unsigned int Image_Width, unsig
 		pImageBuff++;
 	}
 	
-	// Construir el histograma acumulativo el cual ser· nuestra tabla de lookup
+	// Construir el histograma acumulativo el cual ser√° nuestra tabla de lookup
 	a_CumulativeHistogramR[0] = a_HistogramR[0];
 	a_CumulativeHistogramG[0] = a_HistogramG[0];
 	a_CumulativeHistogramB[0] = a_HistogramB[0];
@@ -241,7 +370,7 @@ void EcualizacionHistograma(RGB_Pixel_t * InImg, unsigned int Image_Width, unsig
 	out.close();
 
 	//Mapear la imagen original para tener un histograma ecualizado (Nota: las divisiones 
-	//no pueden omitirse usando este metodo, este calculo ser· lento)
+	//no pueden omitirse usando este metodo, este calculo ser√° lento)
 	pImageBuff = InImg;
 	for (int i = 0; i < Image_Size; i++) {
 		
@@ -295,8 +424,8 @@ void EcualizacionHistograma(RGB_Pixel_t * InImg, unsigned int Image_Width, unsig
 	delete[] a_CumulativeHistogramR;
 }
 
-//Realizar la ecualizaciÛn del Histograma en la imagen
-void EcualizacionHistograma8bits(RGB_Pixel_t * InImg, unsigned int Image_Width, unsigned int Image_Height, RGB_Pixel_t * OutImg)
+//Realizar la ecualizaci√≥n del Histograma en la imagen
+void EcualizacionHistograma8bits(unsigned char * InImg, unsigned int Image_Width, unsigned int Image_Height, unsigned char * OutImg)
 {
 	// Declaramos la variable
 	int * a_Histogram = new int[256];
@@ -305,25 +434,25 @@ void EcualizacionHistograma8bits(RGB_Pixel_t * InImg, unsigned int Image_Width, 
 
 
 	int Image_Size = Image_Width * Image_Height;
-	int TempVariableR = 0;
+	int TempVariable = 0;
 	
 	// Crear la imagen y ecualizar los punteros a la imagen 
-	RGB_Pixel_t* pImageBuff = InImg;
-	RGB_Pixel_t* pHistBuff = OutImg;
+	unsigned char* pImageBuff = InImg;
+	unsigned char* pHistBuff = OutImg;
 
 	memset(a_Histogram, 0, sizeof(int) * 256);
 
 	//------------------------------------------------------------------------------//
-	//Equalise Histogram
+	// Ecualizar Histograma
 	//------------------------------------------------------------------------------//
-	// Build Histogram of image
+	// Construir un histograma de la imagen
 	for (int i = 0; i < Image_Size; i++)
 	{
-		a_Histogram[pImageBuff->Comp.Red]++;
+		a_Histogram[*pImageBuff]++;
 		pImageBuff++;
 	}
 
-	// Construir el histograma acumulativo el cual ser· nuestra tabla de lookup
+	// Construir el histograma acumulativo el cual ser√° nuestra tabla de lookup
 	a_CumulativeHistogram[0] = a_Histogram[0];
 
 	
@@ -334,22 +463,18 @@ void EcualizacionHistograma8bits(RGB_Pixel_t * InImg, unsigned int Image_Width, 
 	}
 
 	//Mapear la imagen original para tener un histograma ecualizado (Nota: las divisiones 
-	//no pueden omitirse usando este metodo, este calculo ser· lento)
+	//no pueden omitirse usando este metodo, este calculo ser√° lento)
 	pImageBuff = InImg;
 	for (int i = 0; i < Image_Size; i++) {
 
-		TempVariableR = (int)(a_CumulativeHistogram[(pImageBuff->Comp.Red)] * 255 * 1. / (Image_Size));
+		TempVariable = (int)(a_CumulativeHistogram[*pImageBuff] * 255 * 1. / (Image_Size));
 		
 		
-		if (TempVariableR > 255) {
-			pHistBuff->Comp.Red = (unsigned char)(255);
-			pHistBuff->Comp.Green = (unsigned char)(255);
-			pHistBuff->Comp.Blue = (unsigned char)(255);
+		if (TempVariable > 255) {
+			*pHistBuff = (unsigned char)(255);
 		}
 		else {
-			pHistBuff->Comp.Red = (unsigned char)(TempVariableR);
-			pHistBuff->Comp.Green = (unsigned char)(TempVariableR);
-			pHistBuff->Comp.Blue = (unsigned char)(TempVariableR);
+			*pHistBuff = (unsigned char)(TempVariable);
 		}
 	
 
@@ -357,8 +482,77 @@ void EcualizacionHistograma8bits(RGB_Pixel_t * InImg, unsigned int Image_Width, 
 		pImageBuff++;
 	}
 	//------------------------------------------------------------------------------//
-	//Clean-up Before Exiting
+	// Limpiamos antes de salir
 	//------------------------------------------------------------------------------//
 	delete[] a_Histogram;
 	delete[] a_CumulativeHistogram;
 }
+
+//Realizar la ecualizaci√≥n del Histograma en la imagen
+void EcualizacionHistograma1bit(unsigned char *InImg, unsigned int Image_Width, unsigned int Image_Height, unsigned char *OutImg)
+{
+	// Declaramos la variable
+	int * a_Histogram = new int[2];
+
+	int * a_CumulativeHistogram = new int[2];
+
+
+	int Image_Size = Image_Width * Image_Height;
+	int TempVariable = 0;
+	
+	// Crear la imagen y ecualizar los punteros a la imagen 
+	unsigned char* pImageBuff = InImg;
+	unsigned char* pHistBuff = OutImg;
+
+	memset(a_Histogram, 0, sizeof(int) * 2);
+
+	//------------------------------------------------------------------------------//
+	// Ecualizar Histograma
+	//------------------------------------------------------------------------------//
+	// Construir un histograma de la imagen
+	for (int i = 0; i < Image_Size; i++)
+	{
+		// if (i < 200) 
+		// 	printf("i = %d, val = %d, hex = %x\n", i, (int)*pImageBuff, *pImageBuff);
+		a_Histogram[(*pImageBuff >> 7) & 1]++;
+		pImageBuff++;
+	}
+
+	// Construir el histograma acumulativo el cual ser√° nuestra tabla de lookup
+	a_CumulativeHistogram[0] = a_Histogram[0];
+
+	
+	printf("acumulado 0 = %d\n", a_Histogram[0]);
+	for (int i = 1; i < 2; i++) {
+		a_CumulativeHistogram[i] = a_CumulativeHistogram[i - 1] + a_Histogram[i];
+		//printf("acumulado %d = %d\n",i, a_CumulativeHistogram[i]);
+	}
+
+	//Mapear la imagen original para tener un histograma ecualizado (Nota: las divisiones 
+	//no pueden omitirse usando este metodo, este calculo ser√° lento)
+	pImageBuff = InImg;
+	for (int i = 0; i < Image_Size; i++) {
+
+		TempVariable = (int)(a_CumulativeHistogram[(*pImageBuff >> 7) & 1] * 1. / (Image_Size));
+		
+		if (TempVariable >= 1) { 
+			*pHistBuff = (unsigned char)(255);
+		}
+		else {
+			*pHistBuff = (unsigned char)(0);
+		}
+	
+
+		pHistBuff++;
+		pImageBuff++;
+	}
+	//------------------------------------------------------------------------------//
+	// Limpiamos antes de salir
+	//------------------------------------------------------------------------------//
+	delete[] a_Histogram;
+	delete[] a_CumulativeHistogram;
+}
+
+
+
+

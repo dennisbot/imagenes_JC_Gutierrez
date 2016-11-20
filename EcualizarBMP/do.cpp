@@ -156,8 +156,61 @@ void readWriteFile(string infilename, string outfilename) {
 }
 
 int main() {
-	/*test();
-	return 0;*/
+	// string file = getWithPath("out_ecualizado\\lena_1bit_output.bmp");
+	// db(file);
+	// ifstream infile(file, ios::in | ios::binary);
+	// bmp_header_info input_file_header;
+	// int header_size = 54;
+	// char* header = new char[2];
+	// infile.read(header, 2);	
+	// infile.read((char*)&input_file_header, sizeof(input_file_header));
+	// char *info_paleta = new char[4 * 2];
+	
+	// printf("sizeof paleta 1 bit = %d\n", sizeof(palette_t));
+	// infile.read(info_paleta, 2 * sizeof(palette_t));
+	
+	// palette_t *paleta = (palette_t*)info_paleta;	
+
+
+	// puts("________________________________________________");
+	// printf("n煤mero de bits por pixel = %d\n", input_file_header.num_of_bit_per_pix);
+	// printf("offset of pixel data = %d\n", input_file_header.offset_of_pixel_data);
+	// puts("PALETA DE 1 BIT DE PROFUNDIDAD");
+	// puts("======================================");
+	// printf("%d - %x\n", paleta->rgbBlue, paleta->rgbBlue);
+	// printf("%d - %x\n", paleta->rgbGreen, paleta->rgbGreen);
+	// printf("%d - %x\n", paleta->rgbRed, paleta->rgbRed);
+	// printf("%d - %x\n", paleta->rgbReserved, paleta->rgbReserved);
+	// puts("======================================");
+	// puts("para el sgte color:"); paleta++;
+	// puts("======================================");
+	// printf("%d - %x\n", paleta->rgbBlue, paleta->rgbBlue);
+	// printf("%d - %x\n", paleta->rgbGreen, paleta->rgbGreen);
+	// printf("%d - %x\n", paleta->rgbRed, paleta->rgbRed);
+	// printf("%d - %x\n", paleta->rgbReserved, paleta->rgbReserved);
+	// puts("======================================");
+	// printf("offset :) = %d\n", header_size + 2 * sizeof(palette_t));
+	// puts("________________________________________________");
+	// int length = input_file_header.size_of_file;
+	// char *buffer = new char[length - header_size - 2 * sizeof(palette_t)];
+	// infile.read(buffer, length - header_size - 2 * sizeof(palette_t));
+	// infile.close();
+	// return 0;
+
+
+	// int b = 1 << 1;
+	// db(b);
+	// unsigned short a = 128;
+	// int res = (a >> 7) & 1;
+	// printf("%d %x\n", a, a);
+
+	// printf("%d %x\n", (a >> 6), (a >> 6));
+	// int res2 = (a >> 6) | 1;
+	// printf("%d\n", res); //1
+	// printf("%d\n", res2); //3
+	// return 0;
+	// test();
+	// return 0;
 	/*test_read_header_create_bmp();
 	return 0;*/
 
@@ -173,7 +226,7 @@ int main() {
 		puts("2.- ecualizacion");
 		puts("3.- salir");
 		puts("========================================");
-		puts("ingrese opci髇:");
+		puts("ingrese opci贸n:");
 		scanf("%d", &opcion);
 		vector< pair<string, string> > imagenes;
 		
@@ -181,10 +234,14 @@ int main() {
 		{
 		case 1:
 
-			imagenes.push_back(make_pair("input\\lena_24bits.bmp", "output\\lena_24bits_out.bmp"));
-			imagenes.push_back(make_pair("input\\lena_8bits.bmp", "output\\lena_8bits_out.bmp"));
-			imagenes.push_back(make_pair("input\\lena_4bits.bmp", "output\\lena_4bits_out.bmp"));
-			imagenes.push_back(make_pair("input\\lena_1bit.bmp", "output\\lena_1bit_out.bmp"));
+			imagenes.push_back(make_pair(getWithPath("input\\lena_24bits.bmp"), 
+				getWithPath("output\\lena_24bits_out.bmp")));
+			imagenes.push_back(make_pair(getWithPath("input\\lena_8bits.bmp"), 
+				getWithPath("output\\lena_8bits_out.bmp")));
+			imagenes.push_back(make_pair(getWithPath("input\\lena_4bits.bmp"), 
+				getWithPath("output\\lena_4bits_out.bmp")));
+			imagenes.push_back(make_pair(getWithPath("input\\lena_1bit.bmp"), 
+				getWithPath("output\\lena_1bit_out.bmp")));
 
 			for (size_t i = 0; i < imagenes.size(); i++) {
 				readWriteFile(imagenes[i].first, imagenes[i].second);
@@ -194,7 +251,7 @@ int main() {
 
 			break;
 		case 2:
-			//puts("ecualizaci髇 / histograma");
+			//puts("ecualizaci贸n / histograma");
 			system("cls");
 			puts("elige la profundidad de la imagen a ecualizar");
 			puts("========================================");
@@ -203,29 +260,46 @@ int main() {
 			puts("3.- 8 bits");
 			puts("4.- 24 bits");
 			puts("========================================");
-			puts("ingrese opci髇:");
+			puts("ingrese opci贸n:");
 
 			scanf("%d", &opcion_depth);
 
 			switch (opcion_depth)
 			{
-				case 1: break;
+				case 1: 
+					in_name = getWithPath("input\\lena_1bit.bmp"), 
+					out_name = getWithPath("out_ecualizado\\lena_1bit_output.bmp");
+					puts("se va a ecualizar una imagen de 1 bit");
+					Ecualizar1bit(in_name, out_name);
+
+					in_img.load(in_name.c_str());
+					out_img.load(out_name.c_str());
+					
+					(in_img, out_img).display();
+					break;
 				case 2: break;
 				case 3: 
-					in_name = "input\\lena512.bmp", out_name = "out_ecualizado\\lena__.bmp";
+					in_name = getWithPath("input\\lena512.bmp"), 
+					out_name = getWithPath("out_ecualizado\\lena_8bits_output.bmp");
 					Ecualizar8bits(in_name, out_name);
+					in_img.load(in_name.c_str());
+					out_img.load(out_name.c_str());
+					
+					(in_img, out_img).display();
 					break;
 				case 4:
-					puts("緿esea a escala de grises o 3 canales?");
+					puts("驴Desea a escala de grises o 3 canales?");
 					puts("======================================");
 					puts("1.- Escala de grises");
 					puts("2.- 3 canales RGB");
 					puts("========================================");
-					puts("ingrese opci髇:");
+					puts("ingrese opci贸n:");
 
 					int opcion_canales;
 					scanf("%d", &opcion_canales);
-					in_name = "input\\lena_24bits.bmp", out_name = "out_ecualizado\\lena_24bits_out.bmp";
+					string addname = (opcion_canales == 1 ? "pgray_scale" : "RGB");
+					in_name = getWithPath("input\\lena_24bits.bmp"), 
+					out_name = getWithPath("out_ecualizado\\lena_24bits_" + addname + ".bmp");
 				
 					Ecualizar(in_name, out_name, opcion_canales == 1);
 
@@ -233,14 +307,8 @@ int main() {
 					out_img.load(out_name.c_str());
 					
 					(in_img, out_img).display();
-
-					break;
-				default:
 					break;
 			}
-
-		default:
-			break;
 		}
 		if (opcion == 3) break;
 	} while (true);

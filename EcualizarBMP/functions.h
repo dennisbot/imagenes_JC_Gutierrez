@@ -9,12 +9,15 @@
 #include <cmath>
 #include <vector>
 #include <time.h>
+
+#define db(a) cout << #a << " = " << a << endl;
+#define PATH_PROJECT "/Users/dennisbot/Google Drive/maestria/semestre_II/imagenes/code/ProjectosJC/EcualizarBMP/"
 using namespace std;
 //------------------------------------------------------------------------------//
 //Algunas estructuras
 //------------------------------------------------------------------------------//
 //------------------------------------------------------------------------------//
-// definimos la estructura que contendrá el header
+// definimos la estructura que contendrÃ¡ el header
 //------------------------------------------------------------------------------//
 struct bmp_header_info
 {
@@ -39,7 +42,7 @@ typedef struct {
 	unsigned char rgbGreen;
 	unsigned char rgbRed;
 	unsigned char rgbReserved;
-} dennisbot;
+} palette_t;
 
 //NOTAR que el bitmap va GRB (BGR for little endian)
 
@@ -56,10 +59,22 @@ typedef union {
 
 void test();
 
-void EcualizacionHistograma8bits(RGB_Pixel_t*, unsigned int, unsigned int, RGB_Pixel_t*);
+
+
+void Ecualizar1bit(string, string);
+
+void Ecualizar4bits(string, string);
 
 void Ecualizar8bits(string, string);
 
 void Ecualizar(string, string, bool);
 
+void EcualizacionHistograma1bit(unsigned char *InImg, unsigned int Image_Width, unsigned int Image_Height, unsigned char *OutImg);
+
+void EcualizacionHistograma4bits(RGB_Pixel_t*, unsigned int, unsigned int, RGB_Pixel_t*);
+
+void EcualizacionHistograma8bits(unsigned char *, unsigned int, unsigned int, unsigned char *);
+
 void EcualizacionHistograma(RGB_Pixel_t*, unsigned int, unsigned int, RGB_Pixel_t*, bool);
+
+string getWithPath(string);
