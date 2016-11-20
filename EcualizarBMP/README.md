@@ -4,4 +4,4 @@ En este trabajo se muestra el proceso de lectura y escritura de archivos DIB (De
 En esta parte del trabajo se utiliza una matriz de histogramas y otra de histograma acumulado realizando luego la formula por cada pixel para obtener nuestra imagen ecualizada (balanceada) para poder visualizar por ejem un mejor contraste.
 
 #Instrucciones
-el punto de entrada de la aplicación se encuentra en el archivo main.cpp, se uso la librería CImg.h para mostrar las imagenes luego de la operación de la ecualización para las distintas profundidades e.g 1, 4, 8 y 24.
+el punto de entrada de la aplicación se encuentra en el archivo **main.cpp**, se uso la librería CImg.h para mostrar las imagenes luego de la operación de la ecualización para las distintas profundidades e.g 1, 4, 8 y 24.
