@@ -10,13 +10,10 @@ else()
 endif()
 
 set(SOURCE_FILES
-    another.cpp
     CImg.h
-    do.cpp
     functions.cpp
     functions.h
     main.cpp
-        reading_writing_struct.cpp
     test.out)
 
 add_executable(EcualizarBMP ${SOURCE_FILES})
