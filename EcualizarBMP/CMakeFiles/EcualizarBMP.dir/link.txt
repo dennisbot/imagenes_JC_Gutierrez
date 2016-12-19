@@ -1,0 +1,1 @@
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++    -std=c++11 -L/opt/X11/lib -lX11 -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/EcualizarBMP.dir/functions.cpp.o CMakeFiles/EcualizarBMP.dir/main.cpp.o  -o EcualizarBMP 
